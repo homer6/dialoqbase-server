@@ -5,21 +5,22 @@ import {
   XMarkIcon,
   CircleStackIcon,
   CogIcon,
-  ChatBubbleLeftIcon,
-  CodeBracketIcon,
-  PuzzlePieceIcon
+  SparklesIcon,
+  PuzzlePieceIcon,
+  EyeDropperIcon,
+  ChatBubbleLeftRightIcon
 } from "@heroicons/react/24/outline";
 
 import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Avatar } from "antd";
+import {  Tooltip } from "antd";
+import Avatar from "../components/Common/Avatar";
 
 const navigation = [
-  { name: "Embed", href: "/bot/:id", icon: CodeBracketIcon },
   {
-    name: "Preview",
-    href: "/bot/:id/preview",
-    icon: ChatBubbleLeftIcon,
+    name: "Playground",
+    href: "/bot/:id",
+    icon: SparklesIcon,
   },
   {
     name: "Data Sources",
@@ -27,9 +28,19 @@ const navigation = [
     icon: CircleStackIcon,
   },
   {
-    name: "Integrations (beta)",
+    name: "Integrations",
     href: "/bot/:id/integrations",
     icon: PuzzlePieceIcon,
+  },
+  {
+    name: "Conversations",
+    href: "/bot/:id/conversations",
+    icon: ChatBubbleLeftRightIcon,
+  },
+  {
+    name: "Appearance",
+    href: "/bot/:id/appearance",
+    icon: EyeDropperIcon,
   },
   {
     name: "Settings",
@@ -43,7 +54,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function BotLayout({ children }: { children: React.ReactNode }) {
+export default function BotLayout({
+  children,
+}: {
+  children: React.ReactNode;
+  noPadding?: boolean;
+}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const params = useParams<{ id: string }>();
   const location = useLocation();
@@ -122,6 +138,10 @@ export default function BotLayout({ children }: { children: React.ReactNode }) {
                       alt="Dialoqbase"
                     />
                     <span className="ml-1 text-xl font-bold">Dialoqbase</span>
+                    <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
+                      {/* @ts-ignore */}
+                      {`v${__APP_VERSION__}`}
+                    </span>
                   </Link>
                   <div className="mt-5 h-0 flex-1 overflow-y-auto">
                     <nav className="space-y-1 px-2">
@@ -163,49 +183,45 @@ export default function BotLayout({ children }: { children: React.ReactNode }) {
           </Dialog>
         </Transition.Root>
 
-        <div className="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col">
+        <div className="hidden md:fixed md:inset-y-0 md:flex md:flex-col">
           <div className="flex flex-grow flex-col overflow-y-auto border-r border-gray-200 bg-white pt-5">
-            <Link
-              to="/"
-              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3"
-            >
-              <img className="h-8 w-auto" src="/logo.png" alt="Dialoqbase" />
-              <span className="ml-1 text-xl font-bold">Dialoqbase</span>
-            </Link>
-            <div className="mt-5 flex flex-grow flex-col">
+            <div className="mt-14 flex flex-grow flex-col">
               <nav className="flex-1 space-y-1 px-2 pb-4">
                 {navigation.map((item) => (
-                  <Link
-                    key={item.name}
-                    to={{
-                      pathname: item.href.replace(":id", params.id!),
-                    }}
-                    className={classNames(
-                      location.pathname === item.href.replace(":id", params.id!)
-                        ? "bg-gray-100 text-gray-900"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
-                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
-                    )}
-                  >
-                    <item.icon
+                  <Tooltip placement="right" key={item.name} title={item.name}>
+                    <Link
+                      to={{
+                        pathname: item.href.replace(":id", params.id!),
+                      }}
                       className={classNames(
                         location.pathname ===
                           item.href.replace(":id", params.id!)
-                          ? "text-gray-500"
-                          : "text-gray-400 group-hover:text-gray-500",
-                        "mr-3 flex-shrink-0 h-6 w-6"
+                          ? "bg-gray-100 text-gray-900"
+                          : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
+                        "group  flex items-center px-2 py-2 text-sm font-medium rounded-md"
                       )}
-                      aria-hidden="true"
-                    />
-                    {item.name}
-                  </Link>
+                    >
+                      <item.icon
+                        className={classNames(
+                          location.pathname ===
+                            item.href.replace(":id", params.id!)
+                            ? "text-gray-500"
+                            : "text-gray-400 group-hover:text-gray-500",
+                          "flex-shrink-0 h-6 w-6"
+                        )}
+                        aria-hidden="true"
+                      />
+                      {/* {item.name} */}
+                    </Link>
+                  </Tooltip>
                 ))}
               </nav>
             </div>
           </div>
         </div>
-        <div className="flex flex-1 flex-col md:pl-64">
-          <div className="sticky top-0 z-10 flex h-16 flex-shrink-0 bg-white border-b border-gray-200 ">
+
+        <div className="flex flex-col">
+          <div className="sticky top-0 z-10 flex h-14  bg-white border-b border-gray-200 ">
             <button
               type="button"
               className="border-r border-gray-200 px-4 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500 md:hidden"
@@ -214,15 +230,25 @@ export default function BotLayout({ children }: { children: React.ReactNode }) {
               <span className="sr-only">Open sidebar</span>
               <Bars3BottomLeftIcon className="h-6 w-6" aria-hidden="true" />
             </button>
+            <Link
+              to="/"
+              className="focus:outline-none focus-visible:ring-2 focus-visible:ring-pink-700 flex items-center px-3"
+            >
+              <img className="h-8 w-auto" src="/logo.png" alt="Dialoqbase" />
+              <span className="ml-1 text-xl font-bold">Dialoqbase</span>
+              <span className="inline-block flex-shrink-0 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 ml-2">
+                {/* @ts-ignore */}
+                {`v${__APP_VERSION__}`}
+              </span>
+            </Link>
+
             <div className="flex flex-1 justify-end px-4">
               <div className="ml-4 flex items-center md:ml-6">
                 <Menu as="div" className="relative ml-3">
                   <div>
                     <Menu.Button className="flex max-w-xs items-center rounded-full bg-white text-sm">
-                      <span className="sr-only">Open user menu</span>
-                      <Avatar shape="square">
-                        {profile?.username?.charAt(0).toUpperCase()}
-                      </Avatar>
+                      <span className="sr-only">Open usermenu</span>
+                      <Avatar username={profile?.username || "admin"} />
                     </Menu.Button>
                   </div>
                   <Transition
@@ -270,18 +296,11 @@ export default function BotLayout({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </div>
-
           <main className="flex-1">
-            <div className="py-6">
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-                {/* Replace with your content */}
-                {children}
-                {/* <div className="py-4">
+            {children}
+            {/* <div className="py-4">
                   <div className="h-96 rounded-lg border-4 border-dashed border-gray-200" />
                 </div> */}
-                {/* /End replace */}
-              </div>
-            </div>
           </main>
         </div>
       </div>

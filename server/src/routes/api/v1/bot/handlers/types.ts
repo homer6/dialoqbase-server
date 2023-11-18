@@ -1,8 +1,8 @@
 export interface CreateBotRequest {
   Body: {
     name?: string;
-    type: string;
-    content: string;
+    type?: string;
+    content?: string;
     embedding: string;
     model: string;
     maxDepth?: number;
@@ -61,5 +61,11 @@ export interface UpdateBotById {
     model: string;
     qaPrompt: string;
     questionGeneratorPrompt: string;
+    streaming: boolean;
+    showRef: boolean;
+    use_hybrid_search: boolean;
+    bot_protect: boolean;
+    use_rag: boolean;
+    bot_model_api_key: string
   };
 }

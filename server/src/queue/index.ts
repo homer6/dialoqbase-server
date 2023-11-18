@@ -8,10 +8,16 @@ import { crawlQueueController } from "./controllers/crawl.controller";
 import { DocxQueueController } from "./controllers/docx.controller";
 import { csvQueueController } from "./controllers/csv.controller";
 import { githubQueueController } from "./controllers/github.controller";
+import { txtQueueController } from "./controllers/txt.controller";
+import { audioQueueController } from "./controllers/audio.controller";
+import { videoQueueController } from "./controllers/video.controller";
+import { youtubeQueueController } from "./controllers/youtube.controller";
+import { restQueueController } from "./controllers/rest.controller";
+import { sitemapQueueController } from "./controllers/sitemap.controller";
 
 const prisma = new PrismaClient();
 
-export const queueHandler = async (job: Job, done: DoneCallback) => {
+export default async function queueHandler(job: Job, done: DoneCallback) {
   const data = job.data as QSource[];
   await prisma.$connect();
   console.log("Processing queue");
@@ -64,6 +70,32 @@ export const queueHandler = async (job: Job, done: DoneCallback) => {
               source,
             );
             break;
+          case "txt":
+            await txtQueueController(
+              source,
+            );
+            break;
+          case "mp3":
+            await audioQueueController(
+              source,
+            );
+            break;
+          case "mp4":
+            await videoQueueController(
+              source,
+            );
+            break;
+          case "youtube":
+            await youtubeQueueController(
+              source,
+            );
+            break;
+          case "rest":
+            await restQueueController(source);
+            break;
+          case "sitemap":
+            await sitemapQueueController(source);
+            break;
           default:
             break;
         }
@@ -77,9 +109,11 @@ export const queueHandler = async (job: Job, done: DoneCallback) => {
             isPending: false,
           },
         });
+
+        done();
+        await prisma.$disconnect();
       } catch (e) {
         console.log(e);
-
         await prisma.botSource.update({
           where: {
             id: source.id,
@@ -89,11 +123,11 @@ export const queueHandler = async (job: Job, done: DoneCallback) => {
             isPending: false,
           },
         });
+        await prisma.$disconnect();
+        done();
       }
     }
   } catch (e) {
     console.log(e);
   }
-  await prisma.$disconnect();
-  done();
-};
+}

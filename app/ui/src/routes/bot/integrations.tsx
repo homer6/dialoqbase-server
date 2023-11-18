@@ -26,13 +26,17 @@ export default function BotIntegrationRoot() {
             description: string;
             help: string;
             requiredMessage: string;
+            inputType: string;
             value: string;
           }[];
           isPaused: boolean;
           status: string;
           color: string;
-    textColor: string;
-
+          textColor: string;
+          connectBtn?: {
+            text: string;
+            link: string;
+          } | null;
         }[];
       };
     },
@@ -48,8 +52,11 @@ export default function BotIntegrationRoot() {
     }
   }, [status]);
 
-  return <>
+  return (
+    <div className="mx-auto my-3 w-full max-w-7xl">
+
       {status === "loading" && <SkeletonLoading />}
       {status === "success" && <IntegrationGrid data={data.data} />}
-  </>;
+    </div>
+  );
 }
